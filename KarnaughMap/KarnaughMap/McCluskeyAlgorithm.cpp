@@ -123,6 +123,19 @@ bool McCluskeyAlgorithm::isChecked(string pi, string binary, int bit)
 		return false;
 }
 
+void McCluskeyAlgorithm::free_all()
+{
+	input_arr.clear();
+	nepi.clear(); 
+	pi.clear();
+	epi.clear();
+	answer.clear();
+}
+
+McCluskeyAlgorithm::McCluskeyAlgorithm()
+{
+}
+
 McCluskeyAlgorithm::McCluskeyAlgorithm(int num_var)
 {
 	this->num_var = num_var;
@@ -134,9 +147,9 @@ void McCluskeyAlgorithm::QM_Method()
 	int bitnum = this->num_var;  // bitnum: Số lượng biến của  hàm bool
 	int num_of_mt = this->input_arr.size(); // number of minterm: Số lượng số ô tô đen
 
-	string s;
+	string s; // Chuổi trung gian để chuyển thành mã nhị phân
 
-	vector<int> check(num_of_mt, 0); // Mảng để kiểm tra các minterm kết hợp với nhau
+	//vector<int> check(num_of_mt, 0); // Mảng để kiểm tra các minterm kết hợp với nhau
 	vector<int> minterm; // Lưu tạm dữ liệu các số để chuyển sang binary
 	vector<int> origin_minterm; // Lưu giá trị các ô input từ người dùng
 	vector<string> binary_minterm; // Lưu các giá trị nhị phân từ các oo trong origin_minterm
@@ -184,7 +197,7 @@ void McCluskeyAlgorithm::QM_Method()
 	for (int i = 0; i < bitnum; i++)
 	{
 		// Tiến hành ghép cặp và rút gon:
-		// Giả sử sau vòng for đầu (i=0) ta có 2 giá trị -001 và -101 thì vòng for tiếp theo 2 giá trị này có thể gặp nhau và ghép lại thành --01
+		// Giả sử sau vòng for đầu (i=2) ta có 2 giá trị -001 và -101 thì vòng for tiếp theo 2 giá trị này có thể gặp nhau và ghép lại thành --01
 		// Tiến hành ghép như thế để tạo tế bào lớn
 
 		combine(combine_minterm, binary_minterm, bitnum);
@@ -194,23 +207,24 @@ void McCluskeyAlgorithm::QM_Method()
 	for (int i = 0; i < combine_minterm.size(); i++)
 		pi.push_back(combine_minterm[i]);
 
-	vector<vector<int> > epi_check_board(binary_minterm.size(), vector<int>(pi.size(), 0));
+	vector<vector<int> > epi_check_board(binary_minterm.size(), vector<int>(pi.size(), 0)); // Khởi tạo một mảng check tế bào đã kiểm tra
 
 	for (int i = 0; i < binary_minterm.size(); i++)
 	{
 		for (int j = 0; j < pi.size(); j++)
 		{
 			/*
-			// Kiểm tra nếu thằng còn lại chưau ghép nếu nó đã nằm trong thằng lớn hơn rồi thì gắn nhãn là 1
-			// Ví dụ chổ gọi hàm combile thì có 1 hoặc nhiều phần tử trong mảng combine_minterm không thể ghép cặp được do số lượng bit 1 chênh nhau khác 1
-			// thì ở bước này ta xét nếu ô đó nằm trong cặp đã kết hợp thì bỏ qua nó.
-			// combine_minterm có 3 con 0001, 001-, 011- thì cặp 001- sẽ kết hợp với cặp 011- thành 0-1- và ô 0001 đã nằm trong khối này rồi.
+			Kiểm tra nếu thằng còn lại chưa ghép nếu nó đã nằm trong thằng lớn hơn rồi thì gắn nhãn là 1
+			Ví dụ chổ gọi hàm combile thì có 1 hoặc nhiều phần tử trong mảng combine_minterm không thể ghép cặp được do số lượng bit 1 chênh nhau khác 1
+			thì ở bước này ta xét nếu ô đó nằm trong cặp đã kết hợp thì bỏ qua nó.
+			combine_minterm có 3 con 0001, 001-, 011- thì cặp 001- sẽ kết hợp với cặp 011- thành 0-1- và ô 0001 đã nằm trong khối này rồi.
 			*/
 			if (isChecked(pi[j], binary_minterm[i], bitnum))
 				epi_check_board[i][j] = 1;
 		}
 	}
 
+	// Kiểm tra nếu mảmg check_board nếu chỉ có 1 ô là 1 thì nó là tế bào lớn chỉ gồm 1 ô và ta đẩy nó vào mẩng 
 	for (int i = 0; i < binary_minterm.size(); i++)
 	{
 		int ans = 0;;
@@ -384,6 +398,47 @@ void McCluskeyAlgorithm::Minimizer()
 	cout << endl;
 }
 
+void McCluskeyAlgorithm::Main_Menu()
+{
+	int choose = 0;
+
+	while (1) {
+		int n;
+
+		this->free_all();
+
+		system("cls");
+
+		cout << "Enter num variable of Karnaugh map: ";
+		cin >> n;
+
+		system("cls");
+
+
+		this->num_var = n;
+
+		cout << "------------------------------------------" << endl;
+
+		this->Input();
+		this->QM_Method();
+		this->Minimizer();
+
+		cout << endl; 
+		cout << "Do you want to continues ? (1. Yes, 2. No) ";
+		fflush(stdin); cin.ignore();
+
+		cin >> choose;
+
+
+
+		if (choose != 1) {
+			cout << "Thank for using ! \n\n";
+			return;
+		}
+	}
+	
+}
+
 McCluskeyAlgorithm::~McCluskeyAlgorithm()
 {
 }
@@ -400,18 +455,23 @@ void McCluskeyAlgorithm::Input()
 
 	int in;
 
-	cout << "\nInput value followed by ENTER [^D ends input]\n> ";
+	cout << "\nInput value followed by ENTER [-1 ends input]\n> ";
+	cin >> in;
+	this->input_arr.push_back(in);
 
-	while (cin >> in) {
+	while (in != -1) {
 		system("cls");
 
 		m.update(in);
 		m.show();
 
-		cout << "\nInput value followed by ENTER [^D ends input]\n ";
+		cout << "\nInput value followed by ENTER [-1 ends input]\n ";
 		cout << "> ";
+		cin >> in;
 
-		this->input_arr.push_back(in);
+		if (in != -1) {
+			this->input_arr.push_back(in);
+		}
 	}
 
 	sort(this->input_arr.begin(), this->input_arr.end());

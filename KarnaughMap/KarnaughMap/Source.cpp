@@ -7,24 +7,9 @@ using namespace std;
 
 int main()
 {
-	int n;
+	McCluskeyAlgorithm mc;
 
-	
-	cout << "Enter num variable of Karnaugh map: ";
-	cin >> n;
-
-	system("cls");
-
-
-	McCluskeyAlgorithm mc(n);
-
-	cout << "------------------------------------------" << endl;
-
-	mc.Input();
-	mc.QM_Method();
-	mc.Minimizer();
-	cout << endl;
-
+	mc.Main_Menu();
 
 	system("pause");
 	return 0;
